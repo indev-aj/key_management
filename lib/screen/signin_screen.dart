@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:key_manage/screen/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
@@ -15,6 +16,9 @@ class _SignInState extends State<SignIn> {
   final _nameCtrl = TextEditingController();
   final _rfidCtrl = TextEditingController();
 
+  String userId = "";
+  bool isLoggedIn = false;
+
   final SnackBar snackBar = const SnackBar(
     content: Text(
       'User does not exist!',
@@ -22,6 +26,12 @@ class _SignInState extends State<SignIn> {
     ),
     backgroundColor: Colors.red,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    autoLogIn();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +82,9 @@ class _SignInState extends State<SignIn> {
                   );
 
                   if (loggedIn != null) {
+                    // Save user info
+                    // logInUser(_rfidCtrl.text);
+
                     // Navigate to Home Screen
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
@@ -89,5 +102,28 @@ class _SignInState extends State<SignIn> {
         ),
       ),
     );
+  }
+
+  Future logInUser(String rfid) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('rfid', rfid);
+
+    setState(() {
+      userId = rfid;
+      isLoggedIn = true;
+    });
+  }
+
+  void autoLogIn() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? rfid = prefs.getString('rfid');
+
+    if (userId != 'null') {
+      setState(() {
+        isLoggedIn = true;
+        userId = rfid.toString();
+      });
+      return;
+    }
   }
 }
