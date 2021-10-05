@@ -43,15 +43,28 @@ class _SignInState extends State<SignIn> {
         padding: const EdgeInsets.all(15),
         child: Column(
           children: [
+            const SizedBox(height: 30),
             TextField(
               controller: _nameCtrl,
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.person),
+                labelText: 'Name',
+              ),
             ),
+            const SizedBox(height: 10),
             TextField(
               controller: _rfidCtrl,
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.lock),
+                labelText: 'RFID',
+              ),
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 30),
             ElevatedButton(
               child: const Text("Submit"),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 36),
+              ),
               onPressed: () {
                 Map capturedUser = {
                   'rfid': _rfidCtrl.text,
