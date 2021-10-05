@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -15,6 +14,53 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final databaseReference = FirebaseDatabase.instance.reference();
+  List key1 = [];
+  List key2 = [];
+  List key3 = [];
+
+  List<UserDetails> users = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    databaseReference.child('Test').once().then((DataSnapshot snapshot) {
+      Map keyMap = snapshot.value;
+      Map newData = {};
+
+      keyMap.forEach((key, value) {
+        setState(() {
+          users.add(UserDetails.fromJson(value));
+        });
+      });
+
+      // setState(() {
+      //   keyMap.forEach((key, value) {
+      //     switch (key) {
+      //       case 'Key_1':
+      //         newData = snapshot.value["Key_1"]; // key = Key_1 / Key_2 etc
+      //         newData.forEach((key, value) {
+      //           key1.add(UserDetails.fromJson(value));
+      //         });
+      //         break;
+      //       case 'Key_2':
+      //         newData = snapshot.value["Key_2"]; // key = Key_1 / Key_2 etc
+      //         newData.forEach((key, value) {
+      //           key2.add(UserDetails.fromJson(value));
+      //         });
+      //         break;
+      //       case 'Key_3':
+      //         newData = snapshot.value["Key_3"]; // key = Key_1 / Key_2 etc
+      //         newData.forEach((key, value) {
+      //           key3.add(UserDetails.fromJson(value));
+      //         });
+      //         break;
+      //       default:
+      //     }
+      //   });
+      // });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,22 +75,23 @@ class _HomeScreenState extends State<HomeScreen> {
             childAspectRatio: 1.8,
             crossAxisCount: 2,
           ),
-          itemCount: 10,
+          itemCount: users.length,
           itemBuilder: (context, index) {
             return InkWell(
-              child: keyCard(index + 1, 'Amrin'),
+              child: keyCard(index + 1, users[index]),
               onTap: () {
                 databaseReference.once().then((DataSnapshot snapshot) {
                   List<UserDetails> user = [];
-                  Map<dynamic, dynamic> data =
-                      snapshot.value['Key_${index + 1}'];
+                  var data = snapshot.value['Key_${index + 1}'];
 
-                  data.forEach(
-                      (key, value) => user.add(UserDetails.fromJson(value)));
+                  if (data != null) {
+                    data.forEach(
+                        (key, value) => user.add(UserDetails.fromJson(value)));
+                  }
 
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) =>
-                          HistoryScreen(index: index + 1, user: user)));
+                          HistoryScreen(index: index + 1, userDetails: user)));
                 });
               },
             );
@@ -54,12 +101,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget keyCard(int key, String name) {
-    final randomNumberGenerator = Random();
-    final randomBoolean = randomNumberGenerator.nextBool();
-
-    final String status = randomBoolean ? "Available" : "Not Available";
-    final String user = status == "Available" ? "None" : name;
+  keyCard(int keyNum, UserDetails user) {
+    final String status = user.keyStatus == "0" ? "Available" : "Not Available";
+    final String name = user.name == null ? "None" : user.name.toString();
 
     return Card(
       child: Padding(
@@ -68,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // ignore: prefer_const_constructors
             Text(
-              'KEY $key',
+              'KEY $keyNum',
               // ignore: prefer_const_constructors
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
@@ -82,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(fontSize: 14),
             ),
             // ignore: prefer_const_constructors
-            Text('Used By: $user'),
+            Text('Used By: $name'),
           ],
         ),
       ),
