@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:key_manage/model.dart';
@@ -26,39 +24,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     databaseReference.child('Test').once().then((DataSnapshot snapshot) {
       Map keyMap = snapshot.value;
-      Map newData = {};
 
       keyMap.forEach((key, value) {
         setState(() {
           users.add(UserDetails.fromJson(value));
         });
       });
-
-      // setState(() {
-      //   keyMap.forEach((key, value) {
-      //     switch (key) {
-      //       case 'Key_1':
-      //         newData = snapshot.value["Key_1"]; // key = Key_1 / Key_2 etc
-      //         newData.forEach((key, value) {
-      //           key1.add(UserDetails.fromJson(value));
-      //         });
-      //         break;
-      //       case 'Key_2':
-      //         newData = snapshot.value["Key_2"]; // key = Key_1 / Key_2 etc
-      //         newData.forEach((key, value) {
-      //           key2.add(UserDetails.fromJson(value));
-      //         });
-      //         break;
-      //       case 'Key_3':
-      //         newData = snapshot.value["Key_3"]; // key = Key_1 / Key_2 etc
-      //         newData.forEach((key, value) {
-      //           key3.add(UserDetails.fromJson(value));
-      //         });
-      //         break;
-      //       default:
-      //     }
-      //   });
-      // });
     });
   }
 

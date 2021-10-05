@@ -1,7 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-
-// import 'package:key_manage/screen/home_screen.dart';
+import 'package:key_manage/screen/home_screen.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
@@ -13,8 +12,16 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   final DatabaseReference databaseReference =
       FirebaseDatabase.instance.reference();
-  final _usernameCtrl = TextEditingController();
+  final _nameCtrl = TextEditingController();
   final _rfidCtrl = TextEditingController();
+
+  final SnackBar snackBar = const SnackBar(
+    content: Text(
+      'User does not exist!',
+      style: TextStyle(color: Colors.white),
+    ),
+    backgroundColor: Colors.red,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -27,45 +34,54 @@ class _SignInState extends State<SignIn> {
         child: Column(
           children: [
             TextField(
-              controller: _usernameCtrl,
+              controller: _nameCtrl,
             ),
             TextField(
               controller: _rfidCtrl,
             ),
+            const SizedBox(height: 15),
             ElevatedButton(
               child: const Text("Submit"),
               onPressed: () {
-                // int count = 0;
+                Map capturedUser = {
+                  'rfid': _rfidCtrl.text,
+                  'name': _nameCtrl.text,
+                };
 
                 databaseReference
-                    .child("user")
+                    .child('Users')
                     .once()
                     .then((DataSnapshot snapshot) {
-                  // final data = snapshot.value;
-                  // for (var val in data) {
-                  //   count++;
-                  // }
+                  Map data = snapshot.value;
 
-                  // for (var item in data) {
-                  //   if () {
-                  //     print('User existed!');
-                  //     Navigator.pushReplacement(
-                  //       context,
-                  //       MaterialPageRoute(
-                  //         builder: (builder) => const HomeScreen(),
-                  //       ),
-                  //     );
-                  //   } else {
-                  //     print(count);
-                  //     count++;
-                  //     databaseReference.child("user").child("$count").set({
-                  //       "Name": _usernameCtrl.text,
-                  //       "Rfid": _rfidCtrl.text,
-                  //     });
-                  //     print(count);
-                  //   }
-                  //   break;
-                  // }
+                  Map user = {};
+                  List users = [];
+
+                  data.forEach((key, value) {
+                    user['rfid'] = key;
+                    user['name'] = value;
+                    users.add(user);
+                    user = {};
+                  });
+
+                  var loggedIn = users.firstWhere(
+                    (user) =>
+                        user['rfid'] == capturedUser['rfid'] &&
+                        user['name'] == capturedUser['name'],
+                    orElse: () => null,
+                  );
+
+                  if (loggedIn != null) {
+                    // Navigate to Home Screen
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => const HomeScreen(),
+                      ),
+                    );
+                  } else {
+                    // Show error message
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }
                 });
               },
             ),
