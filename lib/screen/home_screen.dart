@@ -22,9 +22,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    databaseReference.child('Test').once().then((DataSnapshot snapshot) {
-      Map keyMap = snapshot.value;
-
+    // Update every time there's any changes in the database
+    databaseReference.child('Test').onValue.listen((event) {
+      Map keyMap = event.snapshot.value;
+      users = [];
       keyMap.forEach((key, value) {
         setState(() {
           users.add(UserDetails.fromJson(value));
