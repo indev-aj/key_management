@@ -48,7 +48,6 @@ class _MyAppState extends State<MyApp> {
 
     setState(() {
       rfid = storedData.toString();
-      print(rfid);
     });
   }
 }
