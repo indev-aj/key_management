@@ -61,7 +61,7 @@ class _SignInState extends State<SignIn> {
                 databaseReference
                     .child('Users')
                     .once()
-                    .then((DataSnapshot snapshot) {
+                    .then((DataSnapshot snapshot) async {
                   Map data = snapshot.value;
 
                   Map user = {};
@@ -83,7 +83,9 @@ class _SignInState extends State<SignIn> {
 
                   if (loggedIn != null) {
                     // Save user info
-                    // logInUser(_rfidCtrl.text);
+                    final SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    prefs.setString('rfid', _rfidCtrl.text);
 
                     // Navigate to Home Screen
                     Navigator.of(context).pushReplacement(
@@ -107,11 +109,6 @@ class _SignInState extends State<SignIn> {
   Future logInUser(String rfid) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('rfid', rfid);
-
-    setState(() {
-      userId = rfid;
-      isLoggedIn = true;
-    });
   }
 
   void autoLogIn() async {
