@@ -15,10 +15,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final databaseReference = FirebaseDatabase.instance.reference();
-  List key1 = [];
-  List key2 = [];
-  List key3 = [];
-
   List<UserDetails> users = [];
 
   @override
@@ -39,16 +35,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AlertDialog alert = AlertDialog(
+      title: const Text('Logout'),
+      content: const Text('Are you sure you want to log out?'),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text("No"),
+        ),
+        TextButton(
+          onPressed: () async {
+            final SharedPreferences prefs =
+                await SharedPreferences.getInstance();
+            prefs.setString('rfid', '');
+            Get.offAll(const SignIn());
+          },
+          child: const Text("Yes"),
+        ),
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Key Management'),
         actions: [
           IconButton(
-            onPressed: () async {
-              final SharedPreferences prefs =
-                  await SharedPreferences.getInstance();
-              prefs.setString('rfid', '');
-              Get.off(const SignIn());
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return alert;
+                },
+              );
             },
             icon: const Icon(Icons.logout),
           ),
@@ -89,7 +109,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   keyCard(int keyNum, UserDetails user) {
     final String status = user.keyStatus == "0" ? "Available" : "Not Available";
-    final String name = user.name == null ? "None" : user.name.toString();
+    String name;
+
+    if (status == "Available" || user.name == null) {
+      name = "None";
+    } else {
+      name = user.name.toString();
+    }
 
     return Card(
       child: Padding(
